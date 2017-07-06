@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 AWS_CACHE_DIR="${HOME}/.aws/cli/cache"
 
