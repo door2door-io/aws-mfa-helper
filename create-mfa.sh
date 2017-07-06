@@ -1,7 +1,7 @@
 #!/bin/bash
 
 USERNAME="${1}"
-METRHOD="${2}"
+METHOD="${2}"
 PROFILE="my-d2d-user"
 OUTFILE="${TMPDIR:-/tmp/}$(env LC_ALL=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 trap "{ rm -f ${OUTFILE}; }" EXIT
