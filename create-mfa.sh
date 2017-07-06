@@ -6,7 +6,7 @@ PROFILE="my-d2d-user"
 OUTFILE="${TMPDIR:-/tmp/}$(env LC_ALL=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 trap "{ rm -f ${OUTFILE}; }" EXIT
 
-if [ "${METHOD}" = "string" ]
+if [ "${METHOD}" = "--string" ]
 then
     SERIAL_NUMBER=$(aws iam create-virtual-mfa-device --virtual-mfa-device-name "${USERNAME}" --outfile "${OUTFILE}" --bootstrap-method Base32StringSeed --profile "${PROFILE}" | jq -r '.VirtualMFADevice.SerialNumber')
 else
