@@ -1,9 +1,25 @@
-# aws-mfa.sh
+# D2D AWS helper scripts
 
-## Usage
+## create-mfa.sh
+
+Create a new virtual Multi Factor Authentication device for your AWS account
+
+```
+./create-mfa.sh <username>
+```
+
+## aws-mfa.sh
+
+Run commands using temporary credentials after authenticating using MFA and
+assuming a role
 
 Copy the `aws-mfa.sh` script to a location in your PATH
 
 ```
 AWS_PROFILE=my-profile aws-mfa.sh <command>
 ```
+
+## decrypt-gpg.sh and decrypt-keybase.sh
+
+Decrypt content, like your AWS user password and secret key provided by your
+AWS admin, using your PGP key or Keybase profile
