@@ -5,7 +5,7 @@
 Create a new virtual Multi Factor Authentication device for your AWS account
 
 ```
-./create-mfa.sh <username>
+./create-mfa.sh <username> [string]
 ```
 
 ## aws-mfa.sh
