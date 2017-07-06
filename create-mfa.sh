@@ -1,13 +1,18 @@
 #!/bin/bash
 
 USERNAME="${1}"
+METRHOD="${2}"
 PROFILE="my-d2d-user"
 OUTFILE="${TMPDIR:-/tmp/}$(env LC_ALL=C < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 trap "{ rm -f ${OUTFILE}; }" EXIT
 
-read -p "Press ENTER when your MFA app on your smartphone is ready to scan the QR code..."
-
-SERIAL_NUMBER=$(aws iam create-virtual-mfa-device --virtual-mfa-device-name "${USERNAME}" --outfile "${OUTFILE}" --bootstrap-method QRCodePNG --profile "${PROFILE}" | jq -r '.VirtualMFADevice.SerialNumber')
+if [ "${METHOD}" = "string" ]
+then
+    SERIAL_NUMBER=$(aws iam create-virtual-mfa-device --virtual-mfa-device-name "${USERNAME}" --outfile "${OUTFILE}" --bootstrap-method Base32StringSeed --profile "${PROFILE}" | jq -r '.VirtualMFADevice.SerialNumber')
+else
+    read -p "Press ENTER when your MFA app on your smartphone is ready to scan the QR code..."
+    SERIAL_NUMBER=$(aws iam create-virtual-mfa-device --virtual-mfa-device-name "${USERNAME}" --outfile "${OUTFILE}" --bootstrap-method QRCodePNG --profile "${PROFILE}" | jq -r '.VirtualMFADevice.SerialNumber')
+fi
 
 if [ "${SERIAL_NUMBER}" == "" ]
 then
