@@ -24,4 +24,4 @@ AWS_PROFILE=my-profile aws-mfa.sh <command>
 ## decrypt-gpg.sh and decrypt-keybase.sh
 
 Decrypt content, like your AWS user password and secret key provided by your
-AWS admin, using your PGP key or Keybase profile
+AWS admin, using your GPG key or Keybase profile
