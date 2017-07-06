@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 AWS_CACHE_DIR="${HOME}/.aws/cli/cache"
 
@@ -81,10 +81,10 @@ assume_role() {
     fi
     AWS_CACHE_FILE="$(grep -l ${ASSUMED_ARN} ${AWS_CACHE_DIR}/*)"
 
-    # Export session credentials and token for target profile
-    export AWS_ACCESS_KEY_ID=$(jq -r '.Credentials.AccessKeyId' "${AWS_CACHE_FILE}")
-    export AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' "${AWS_CACHE_FILE}")
-    export AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' "${AWS_CACHE_FILE}")
+    # Save session credentials and token for target profile
+    aws configure set "profile.${PROFILE}.aws_access_key_id" $(jq -r '.Credentials.AccessKeyId' "${AWS_CACHE_FILE}")
+    aws configure set "profile.${PROFILE}.aws_secret_access_key" $(jq -r '.Credentials.SecretAccessKey' "${AWS_CACHE_FILE}")
+    aws configure set "profile.${PROFILE}.aws_session_token" $(jq -r '.Credentials.SessionToken' "${AWS_CACHE_FILE}")
 }
 
 
@@ -97,6 +97,11 @@ then
     exit 1
 fi
 
+# Save current profile and unset AWS_PROFILE env variable to not conflict
+# with calls to aws cli in this script
+SAVED_AWS_PROFILE="${AWS_PROFILE}"
+unset AWS_PROFILE
+
 # Create a temp credentials file if not already defined
 if [ "${AWS_SHARED_CREDENTIALS_FILE}" == "" ]
 then
@@ -106,16 +111,19 @@ then
 fi
 
 # Get session credentials
-get_session_token "${AWS_PROFILE}"
+get_session_token "${SAVED_AWS_PROFILE}"
 # Assume role if configured in profile
-ROLE_ARN=$(aws configure get "profile.${AWS_PROFILE}.role_arn")
-assume_role "${AWS_PROFILE}" "${ROLE_ARN}"
+ROLE_ARN=$(aws configure get "profile.${SAVED_AWS_PROFILE}.role_arn")
+assume_role "${SAVED_AWS_PROFILE}" "${ROLE_ARN}"
 
 # Disable any AWS config present on the system before running command
-export AWS_CONFIG_FILE="/dev/null"
+export AWS_CONFIG_FILE=$(mktemp "${TMPDIR:-/tmp/}aws-config.XXXXXXXX")
+aws configure set "profile.${SAVED_AWS_PROFILE}.output" json
 
 # Export AWS_PROFILE
-export AWS_PROFILE="${AWS_PROFILE}"
+export AWS_PROFILE="${SAVED_AWS_PROFILE}"
+export AWS_DEFAULT_PROFILE="${AWS_PROFILE}"
+export AWS_EB_PROFILE="${AWS_PROFILE}"
 
 # Play time!
-exec $@
+$@
