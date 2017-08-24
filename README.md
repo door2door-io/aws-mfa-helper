@@ -12,8 +12,7 @@ Add `--string` parameter to use the string seed method instead of QR code
 
 ## aws-mfa.sh
 
-Run commands using temporary credentials after authenticating using MFA and
-assuming a role
+Run commands using cached temporary credentials using MFA and assumed role
 
 Copy the `aws-mfa.sh` script to a location in your PATH
 
