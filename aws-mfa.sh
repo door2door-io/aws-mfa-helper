@@ -24,7 +24,7 @@ get_session_token() {
     MUST_RENEW=1
     if [ -f "${AWS_CACHE_FILE}" ]
     then
-        EXPIRATION=$(python -c 'import sys; import time; import datetime; dt = datetime.datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ"); print int(time.mktime(dt.timetuple()))' $(jq -r '.Credentials.Expiration' "${AWS_CACHE_FILE}"))
+        EXPIRATION=$(python -c 'import sys; import time; import datetime; dt = datetime.datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ"); print(int(time.mktime(dt.timetuple())))' $(jq -r '.Credentials.Expiration' "${AWS_CACHE_FILE}"))
         if [ "${EXPIRATION}" != "" ]
         then
             NOW=$(date +"%s")
