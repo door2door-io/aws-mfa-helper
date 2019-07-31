@@ -28,3 +28,11 @@ Copy the `aws-mfa.sh` script to a location in your PATH
 ```
 AWS_PROFILE=my-profile aws-mfa.sh <command>
 ```
+
+## connect-ec2.sh
+
+Returns the command in order to connect with a certain EC2 instance given a `Name` tag and the AWS profile.
+
+```
+./connect-ec2.sh <aws-profile> <EC2-instance-Name-Tag>
+```
