@@ -5,9 +5,9 @@
 
 # Script to establish an EC2 connection
 # for bash users:
-# $ echo "alias ssh_ec2=\"~/path-to-repository/drt-terraform-components/scripts/ssh_ec2.sh\"" >> ~/.bash_profile
+# $ echo "alias ssh_ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.bash_profile
 # for zsh users:
-# $ echo "alias ssh_ec2=\"~/path-to-repository/drt-terraform-components/scripts/ssh_ec2.sh\"" >> ~/.zshrc
+# $ echo "alias ssh_ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.zshrc
 if [ $# -ne 2 ]
   then
     echo -e "You must provide: \\n" \
