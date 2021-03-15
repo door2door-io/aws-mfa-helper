@@ -56,7 +56,7 @@ INSTANCES_ID=$INSTANCES | jq '.InstanceId'
 
 INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLICATION-$ENVIRONMENT" --profile $AWS_ACCOUNT --region $REGION | jq '.Reservations[0].Instances[0].InstanceId' | sed 's/"//g')
 
-echo "Starting SSH session to application $APPLICATION-$ENVIRONMENT...\\n"
+echo -e "Starting SSH session to application $APPLICATION-$ENVIRONMENT...\\n"
 
 DB_INSTANCES=$(aws rds describe-db-instances --db-instance-identifier $APPLICATION-pg-$ENVIRONMENT --profile $AWS_ACCOUNT --region $REGION | jq '.DBInstances[0]')
 DB_HOST=$( jq '.Endpoint.Address' <<< "${DB_INSTANCES}" | sed 's/"//g')
@@ -65,15 +65,15 @@ DB_PORT=$( jq '.Endpoint.Port' <<< "${DB_INSTANCES}" )
 if [[ "${DB_HOST}" ]]; then
     GREEN=`tput setaf 2`
     RESET_COLOR=`tput sgr0`
-    echo "If you want to access the database from this application follow these steps:"
+    echo -e "If you want to access the database from this application follow these steps:\\n"
 
-    echo "\\n1. Install sudocat in the EC2 instance you are connecting to by executing"
-    echo " ${GREEN}sudo yum install -y socat${RESET_COLOR}"
-    echo "\\n2. Create a bidirectional byte stream from EC2 to RDS"
-    echo " ${GREEN}sudo socat TCP-LISTEN:$DB_PORT,reuseaddr,fork TCP4:$DB_HOST:$DB_PORT${RESET_COLOR}"
-    echo "\\n3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
-    echo "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION"
-    echo "\\n4. Now you can connect locally without the need of using the bastion host. As additional step, use `localhost` as host for the database"
+    echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
+    echo -e " ${GREEN}sudo yum install -y socat${RESET_COLOR} \\n"
+    echo -e "2. Create a bidirectional byte stream from EC2 to RDS"
+    echo -e " ${GREEN}sudo socat TCP-LISTEN:$DB_PORT,reuseaddr,fork TCP4:$DB_HOST:$DB_PORT${RESET_COLOR}\\n"
+    echo -e "3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
+    echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
+    echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT
