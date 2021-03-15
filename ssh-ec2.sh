@@ -77,4 +77,4 @@ if [[ "${DB_HOST}" ]]; then
     echo -e " ${GREEN}psql -h localhost -p 5432 -U <user> -d <database>${RESET_COLOR} \\n"
 fi
 
-aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT
+aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
