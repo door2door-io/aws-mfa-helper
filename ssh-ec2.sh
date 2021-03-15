@@ -62,19 +62,25 @@ DB_INSTANCES=$(aws rds describe-db-instances --db-instance-identifier $APPLICATI
 DB_HOST=$( jq '.Endpoint.Address' <<< "${DB_INSTANCES}" | sed 's/"//g')
 DB_PORT=$( jq '.Endpoint.Port' <<< "${DB_INSTANCES}" )
 
-if [[ "${DB_HOST}" ]]; then
-    GREEN=`tput setaf 2`
-    RESET_COLOR=`tput sgr0`
-    echo -e "If you want to access the database from this application follow these steps:\\n"
+if [[ ! "${DB_HOST}" ]]; then
+  DB_CLUSTERS=$(aws rds describe-db-clusters --db-cluster-identifier $APPLICATION-pg-$ENVIRONMENT-cluster --profile $AWS_ACCOUNT --region $REGION | jq '.DBClusters[0]')
+  DB_HOST=$( jq '.Endpoint' <<< "${DB_CLUSTERS}" | sed 's/"//g')
+  DB_PORT=$( jq '.Port' <<< "${DB_CLUSTERS}" )
+fi
 
-    echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
-    echo -e " ${GREEN}sudo yum install -y socat${RESET_COLOR} \\n"
-    echo -e "2. Create a bidirectional byte stream from EC2 to RDS"
-    echo -e " ${GREEN}sudo socat TCP-LISTEN:$DB_PORT,reuseaddr,fork TCP4:$DB_HOST:$DB_PORT${RESET_COLOR}\\n"
-    echo -e "3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
-    echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
-    echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
-    echo -e " ${GREEN}psql -h localhost -p 5432 -U <user> -d <database>${RESET_COLOR} \\n"
+if [[ "${DB_HOST}" ]]; then
+  GREEN=`tput setaf 2`
+  RESET_COLOR=`tput sgr0`
+  echo -e "If you want to access the database from this application follow these steps:\\n"
+
+  echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
+  echo -e " ${GREEN}sudo yum install -y socat${RESET_COLOR} \\n"
+  echo -e "2. Create a bidirectional byte stream from EC2 to RDS"
+  echo -e " ${GREEN}sudo socat TCP-LISTEN:$DB_PORT,reuseaddr,fork TCP4:$DB_HOST:$DB_PORT${RESET_COLOR}\\n"
+  echo -e "3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
+  echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
+  echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
+  echo -e " ${GREEN}psql -h localhost -p 5432 -U <user> -d <database>${RESET_COLOR} \\n"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
