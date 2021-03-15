@@ -5,9 +5,9 @@
 
 # Script to establish an EC2 connection
 # for bash users:
-# $ echo "alias ssh_ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.bash_profile
+# $ echo "alias ssh-ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.bash_profile
 # for zsh users:
-# $ echo "alias ssh_ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.zshrc
+# $ echo "alias ssh-ec2=\"~/path-to-repository/ssh-ec2.sh\"" >> ~/.zshrc
 if [ $# -ne 2 ]
   then
     echo -e "You must provide: \\n" \
@@ -73,7 +73,8 @@ if [[ "${DB_HOST}" ]]; then
     echo -e " ${GREEN}sudo socat TCP-LISTEN:$DB_PORT,reuseaddr,fork TCP4:$DB_HOST:$DB_PORT${RESET_COLOR}\\n"
     echo -e "3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
     echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
-    echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database"
+    echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
+    echo -e " ${GREEN}psql -h localhost -p 5432 -U <user> -d <database>${RESET_COLOR} \\n"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT
