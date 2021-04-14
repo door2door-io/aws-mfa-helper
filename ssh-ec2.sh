@@ -58,7 +58,10 @@ INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLIC
 
 echo -e "Starting SSH session to application $APPLICATION-$ENVIRONMENT...\\n"
 
-DB_INSTANCES=$(aws rds describe-db-instances --db-instance-identifier $APPLICATION-pg-$ENVIRONMENT --profile $AWS_ACCOUNT --region $REGION | jq '.DBInstances[0]')
+# Adjustment to fetch DBs for ECS applications
+DB_APPLICATION=$(echo $APPLICATION | sed -e 's/\(ecs\-\)//g')
+
+DB_INSTANCES=$(aws rds describe-db-instances --db-instance-identifier $DB_APPLICATION-pg-$ENVIRONMENT --profile $AWS_ACCOUNT --region $REGION | jq '.DBInstances[0]')
 DB_HOST=$( jq '.Endpoint.Address' <<< "${DB_INSTANCES}" | sed 's/"//g')
 DB_PORT=$( jq '.Endpoint.Port' <<< "${DB_INSTANCES}" )
 
