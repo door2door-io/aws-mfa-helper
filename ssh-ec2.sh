@@ -86,4 +86,23 @@ if [[ "${DB_HOST}" ]]; then
   echo -e " ${GREEN}psql -h localhost -p $DB_PORT -U <user> -d <database>${RESET_COLOR} \\n"
 fi
 
+# Use BI ECS application as jump host to connect with Redshift
+if [[ $APPLICATION = 'ecs-redash' || $APPLICATION = 'ecs-airflow' ]]; then
+   DB_CLUSTERS=$(aws redshift describe-clusters --profile $AWS_ACCOUNT --cluster-identifier redshift-$ENVIRONMENT --region $REGION | jq '.Clusters[0]')
+   REDSHIFT_HOST=$( jq '.Endpoint.Address' <<< "${DB_CLUSTERS}" | sed 's/"//g')
+   REDSHIFT_PORT=$( jq '.Endpoint.Port' <<< "${DB_CLUSTERS}" )
+fi
+if [[ "${REDSHIFT_HOST}" ]]; then
+  echo -e "If you want to access the Redshift database from this application follow these steps:\\n"
+
+  echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
+  echo -e " ${GREEN}sudo yum install -y socat${RESET_COLOR} \\n"
+  echo -e "2. Create a bidirectional byte stream from EC2 to Redshift"
+  echo -e " ${GREEN}sudo socat TCP-LISTEN:$REDSHIFT_PORT,reuseaddr,fork TCP4:$REDSHIFT_HOST:$REDSHIFT_PORT${RESET_COLOR}\\n"
+  echo -e "3. Open another tab in your terminal to create a tunnel to Redshift and run the following command"
+  echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$REDSHIFT_PORT\"], \"localPortNumber\":[\"$REDSHIFT_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
+  echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
+  echo -e " ${GREEN}psql -h localhost -p $REDSHIFT_PORT -U <user> -d <database>${RESET_COLOR} \\n"
+fi
+
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
