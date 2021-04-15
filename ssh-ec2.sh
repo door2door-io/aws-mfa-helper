@@ -83,7 +83,7 @@ if [[ "${DB_HOST}" ]]; then
   echo -e "3. Open another tab in your terminal to create a tunnel to RDS and run the following command"
   echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$DB_PORT\"], \"localPortNumber\":[\"$DB_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
   echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
-  echo -e " ${GREEN}psql -h localhost -p 5432 -U <user> -d <database>${RESET_COLOR} \\n"
+  echo -e " ${GREEN}psql -h localhost -p $DB_PORT -U <user> -d <database>${RESET_COLOR} \\n"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
