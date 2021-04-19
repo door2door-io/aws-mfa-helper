@@ -73,6 +73,7 @@ fi
 
 if [[ "${DB_HOST}" ]]; then
   GREEN=`tput setaf 2`
+  YELLOW=`tput setaf 3`
   RESET_COLOR=`tput sgr0`
   echo -e "If you want to access the database from this application follow these steps:\\n"
 
@@ -100,9 +101,32 @@ if [[ "${REDSHIFT_HOST}" ]]; then
   echo -e "2. Create a bidirectional byte stream from EC2 to Redshift"
   echo -e " ${GREEN}sudo socat TCP-LISTEN:$REDSHIFT_PORT,reuseaddr,fork TCP4:$REDSHIFT_HOST:$REDSHIFT_PORT${RESET_COLOR}\\n"
   echo -e "3. Open another tab in your terminal to create a tunnel to Redshift and run the following command"
-  echo -e "  ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$REDSHIFT_PORT\"], \"localPortNumber\":[\"$REDSHIFT_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
+  echo -e " ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$REDSHIFT_PORT\"], \"localPortNumber\":[\"$REDSHIFT_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
   echo -e "4. Now you can connect locally without the need of using the bastion host. As additional step, use localhost as host for the database. As an example for postgres:"
   echo -e " ${GREEN}psql -h localhost -p $REDSHIFT_PORT -U <user> -d <database>${RESET_COLOR} \\n"
+fi
+
+# Use drt-srever application as jump host to connect to ActiveMQ
+if [[ $APPLICATION = 'drt-server' ]]; then
+   AMQ_BROKER=$(aws mq list-brokers --profile $AWS_ACCOUNT --region $REGION | jq '.BrokerSummaries[0].BrokerId' | sed 's/"//g')
+   AMQ_PORT=8162
+   AMQ_HOST="mq.eu-central-1.amazonaws.com"
+fi
+if [[ "${AMQ_BROKER}" ]]; then
+  echo -e "If you want to access the ActiveMQ wb console follow these steps:\\n"
+
+  echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
+  echo -e " ${GREEN}sudo yum install -y socat${RESET_COLOR} \\n"
+  echo -e "2. Create a bidirectional byte stream from EC2 to ActiveMQ"
+  echo -e " ${GREEN}sudo socat TCP-LISTEN:$AMQ_PORT,reuseaddr,fork TCP4:$AMQ_BROKER-1.$AMQ_HOST:$AMQ_PORT${RESET_COLOR}\\n"
+  if [[ $ENVIRONMENT = 'production' ]]; then
+      echo -e " ${YELLOW}every week, the connection swaps to the other URL, you have to try-and-repeat to figure out the correct one${RESET_COLOR}\\n"
+      echo -e " ${YELLOW}sudo socat TCP-LISTEN:$AMQ_PORT,reuseaddr,fork TCP4:$AMQ_BROKER-2.$AMQ_HOST:$AMQ_PORT${RESET_COLOR}\\n"
+  fi
+  echo -e "3. Open another tab in your terminal to create a tunnel to ActiveMQ and run the following command"
+  echo -e " ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$AMQ_PORT\"], \"localPortNumber\":[\"$AMQ_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
+  echo -e "4. Now you can connect locally without the need of using the bastion host. Be sure to use HTTPS when connecting:"
+  echo -e " ${GREEN}https://localhost:$AMQ_PORT \\n"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
