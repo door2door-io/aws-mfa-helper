@@ -44,7 +44,7 @@ fi
 
 echo "AWS account found: $AWS_ACCOUNT"
 
-INSTANCES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLICATION-$ENVIRONMENT" --profile $AWS_ACCOUNT --region $REGION | jq '.Reservations[0].Instances[0]')
+INSTANCES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLICATION-$ENVIRONMENT" "Name=instance-state-name,Values=running" --profile $AWS_ACCOUNT --region $REGION | jq '.Reservations[0].Instances[0]')
 
 if [ "$INSTANCES" = "null" ]; then
     echo "No EC2 instance could be found for the application: $APPLICATION-$ENVIRONMENT"
@@ -54,7 +54,7 @@ fi
 INSTANCES_ID=$INSTANCES | jq '.InstanceId'
 
 
-INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLICATION-$ENVIRONMENT" --profile $AWS_ACCOUNT --region $REGION | jq '.Reservations[0].Instances[0].InstanceId' | sed 's/"//g')
+INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$APPLICATION-$ENVIRONMENT" "Name=instance-state-name,Values=running" --profile $AWS_ACCOUNT --region $REGION | jq '.Reservations[0].Instances[0].InstanceId' | sed 's/"//g')
 
 echo -e "Starting SSH session to application $APPLICATION-$ENVIRONMENT...\\n"
 
