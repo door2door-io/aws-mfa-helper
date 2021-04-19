@@ -37,6 +37,10 @@ case $ENVIRONMENT in
     AWS_ACCOUNT="d2d-drt-prod"
 esac
 
+GREEN=`tput setaf 2`
+YELLOW=`tput setaf 3`
+RESET_COLOR=`tput sgr0`
+
 if [ -d "${AWS_ACCOUNT}" ]; then
     echo "No AWS account was found for environment: $ENVIRONMENT"
     exit 1
@@ -72,9 +76,6 @@ if [[ ! "${DB_HOST}" ]]; then
 fi
 
 if [[ "${DB_HOST}" ]]; then
-  GREEN=`tput setaf 2`
-  YELLOW=`tput setaf 3`
-  RESET_COLOR=`tput sgr0`
   echo -e "If you want to access the database from this application follow these steps:\\n"
 
   echo -e "1. Install sudocat in the EC2 instance you are connecting to by executing"
