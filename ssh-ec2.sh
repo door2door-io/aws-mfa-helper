@@ -127,7 +127,7 @@ if [[ "${AMQ_BROKER}" ]]; then
   echo -e "3. Open another tab in your terminal to create a tunnel to ActiveMQ and run the following command"
   echo -e " ${GREEN}aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"$AMQ_PORT\"], \"localPortNumber\":[\"$AMQ_PORT\"]}' --profile $AWS_ACCOUNT${RESET_COLOR} --region $REGION \\n"
   echo -e "4. Now you can connect locally without the need of using the bastion host. Be sure to use HTTPS when connecting:"
-  echo -e " ${GREEN}https://localhost:$AMQ_PORT \\n"
+  echo -e " ${GREEN}https://localhost:$AMQ_PORT${RESET_COLOR} \\n"
 fi
 
 aws ssm start-session --target $INSTANCE_ID --profile $AWS_ACCOUNT --region $REGION
