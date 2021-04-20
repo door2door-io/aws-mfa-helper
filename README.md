@@ -29,10 +29,12 @@ Copy the `aws-mfa.sh` script to a location in your PATH
 AWS_PROFILE=my-profile aws-mfa.sh <command>
 ```
 
-## connect-ec2.sh
+## ssh-ec2.sh
 
-Returns the command in order to connect with a certain EC2 instance given a `Name` tag and the AWS profile.
+Connects to the respective application instance in a AWS environment. Can be used as a jump host to enable remote database connections and other features.
 
 ```
-./connect-ec2.sh <aws-profile> <EC2-instance-Name-Tag>
+./ssh-ec2.sh <application-name> <aws-profile>
 ```
+
+E.g.: `./ssh-ec2.sh drt-server d2d-drt-staging`
